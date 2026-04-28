@@ -1,0 +1,92 @@
+### ════════════════════════════════════════════════════════
+###  ApiAzureStorageSecure - Fichero de pruebas HTTP
+### ════════════════════════════════════════════════════════
+
+@baseUrl = https://localhost:7001
+
+### ── 1. LOGIN → Obtener token JWT ─────────────────────────────
+### UserName = Apellido del empleado (ej: KING, SCOTT, JONES...)
+### Password = Número de empleado como string (ej: "7839", "7788"...)
+
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "userName": "KING",
+  "password": "7839"
+}
+
+### Copia el valor de "response" y pégalo en @token abajo
+@token = PEGA_AQUI_EL_TOKEN_JWT
+
+### ── 2. Todos los empleados (público, sin token) ───────────────
+GET {{baseUrl}}/api/empleados
+
+### ── 3. Buscar empleado por Id (requiere token) ────────────────
+GET {{baseUrl}}/api/empleados/7839
+Authorization: Bearer {{token}}
+
+### ── 4. Perfil del empleado logueado (del claim cifrado) ───────
+GET {{baseUrl}}/api/empleados/perfil
+Authorization: Bearer {{token}}
+
+### ── 5. Compañeros de departamento (solo rol PRESIDENTE) ───────
+GET {{baseUrl}}/api/empleados/compis
+Authorization: Bearer {{token}}
+
+### ── 6. Oficios disponibles (público) ─────────────────────────
+GET {{baseUrl}}/api/empleados/oficios
+
+### ── 7. Empleados por oficio (?oficio=ANALISTA&oficio=DIRECTOR)
+GET {{baseUrl}}/api/empleados/empleadosoficios?oficio=ANALISTA&oficio=DIRECTOR
+
+### ── 8. Incrementar salarios a un oficio ───────────────────────
+PUT {{baseUrl}}/api/empleados/incrementarsalarios/500?oficio=ANALISTA
+
+### ════════════════════════════════════════════════════════
+###  AZURE BLOB STORAGE  (todos requieren token)
+### ════════════════════════════════════════════════════════
+
+### ── 9. Listar contenedores ────────────────────────────────────
+GET {{baseUrl}}/api/storageblob/containers
+Authorization: Bearer {{token}}
+
+### ── 10. Crear contenedor (solo PRESIDENTE) ───────────────────
+POST {{baseUrl}}/api/storageblob/createcontainer?containerName=misfotos
+Authorization: Bearer {{token}}
+
+### ── 11. Listar blobs de un contenedor ─────────────────────────
+GET {{baseUrl}}/api/storageblob/blobs?containerName=misfotos
+Authorization: Bearer {{token}}
+
+### ── 12. Descargar blob ─────────────────────────────────────────
+GET {{baseUrl}}/api/storageblob/downloadblob?containerName=misfotos&blobName=imagen.jpg
+Authorization: Bearer {{token}}
+
+### ── 13. Eliminar blob ──────────────────────────────────────────
+DELETE {{baseUrl}}/api/storageblob/deleteblob?containerName=misfotos&blobName=imagen.jpg
+Authorization: Bearer {{token}}
+
+### ── 14. Eliminar contenedor ───────────────────────────────────
+DELETE {{baseUrl}}/api/storageblob/deletecontainer?containerName=misfotos
+Authorization: Bearer {{token}}
+
+### ════════════════════════════════════════════════════════
+###  AZURE FILES  (todos requieren token)
+### ════════════════════════════════════════════════════════
+
+### ── 15. Listar ficheros del File Share ────────────────────────
+GET {{baseUrl}}/api/storagefiles/files
+Authorization: Bearer {{token}}
+
+### ── 16. Leer contenido de fichero de texto ────────────────────
+GET {{baseUrl}}/api/storagefiles/readfile?fileName=notas.txt
+Authorization: Bearer {{token}}
+
+### ── 17. Descargar fichero ──────────────────────────────────────
+GET {{baseUrl}}/api/storagefiles/downloadfile?fileName=documento.pdf
+Authorization: Bearer {{token}}
+
+### ── 18. Eliminar fichero (solo PRESIDENTE) ─────────────────────
+DELETE {{baseUrl}}/api/storagefiles/deletefile?fileName=notas.txt
+Authorization: Bearer {{token}}
